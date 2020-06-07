@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:personalexpenses/components/adaptative_date_picker.dart';
+import 'package:personalexpenses/components/adaptative_text_field.dart';
+
+import 'adaptative_button.dart';
 
 class TransactionForm extends StatefulWidget {
   final void Function(String, double, DateTime) _onSubmitEvent;
@@ -25,78 +29,50 @@ class _TransactionFormState extends State<TransactionForm> {
     widget._onSubmitEvent(description, amount, _selectedDate);
   }
 
-  void _showDatePicker() {
-    showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2019),
-      lastDate: DateTime.now(),
-    ).then((pickedDate) {
-      if (pickedDate == null) {
-        return;
-      }
-
-      setState(() {
-        _selectedDate = pickedDate;
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 5,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: <Widget>[
-            TextField(
-              controller: _descriptionController,
-              onSubmitted: (_) => _submitForm(),
-              decoration: InputDecoration(labelText: 'Description'),
-            ),
-            TextField(
-              controller: _amountController,
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              onSubmitted: (_) => _submitForm(),
-              decoration: InputDecoration(labelText: "Amount (\$)"),
-            ),
-            Container(
-              height: 70,
-              child: Row(
+    return SingleChildScrollView(
+      child: Card(
+        elevation: 5,
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: 10,
+            right: 10,
+            left: 10,
+            bottom: 10 + MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Column(
+            children: <Widget>[
+              AdaptativeTextField(
+                controller: _descriptionController,
+                onSubmitted: (_) => _submitForm(),
+                label: 'Description',
+              ),
+              AdaptativeTextField(
+                controller: _amountController,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                onSubmitted: (_) => _submitForm(),
+                label: "Amount (\$)",
+              ),
+              AdaptativeDatePicker(
+                  selectedDate: _selectedDate,
+                  onDateChanged: (newDate) {
+                    setState(() {
+                      _selectedDate = newDate;
+                    });
+                  },
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      _selectedDate == null
-                          ? 'No date selected'
-                          : 'Selected date: ${DateFormat('MM/dd/y').format(_selectedDate)}',
-                    ),
-                  ),
-                  FlatButton(
-                    textColor: Theme.of(context).primaryColor,
-                    child: Text(
-                      'Select date',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    onPressed: _showDatePicker,
+                  AdaptativeButton(
+                    label: 'New Transaction',
+                    onPressedEvent: _submitForm,
                   ),
                 ],
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                RaisedButton(
-                  child: Text("New Transaction"),
-                  color: Theme.of(context).primaryColor,
-                  textColor: Theme.of(context).textTheme.button.color,
-                  onPressed: _submitForm,
-                ),
-              ],
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );
